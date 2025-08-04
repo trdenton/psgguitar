@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import readline
+import rlcompleter
 import math
+import sys
 import re
 
 class Note:
@@ -47,6 +49,13 @@ class Note:
         base = names[step]
         return f"{base}{octave}"
 
+    def equalIgnoreOctave(self, other):
+        num1 = self.num
+        num2 = other.num
+        if (num1 - num2)%12 == 0:
+            return True
+        return False
+
     def __repr__(self):
         return f"Note({self.name})"
 
@@ -78,9 +87,30 @@ class GuitarString:
         result = GuitarString(note)
         return result
 
+    # returns a Note
+    def fret_note(self, fret_num):
+        return self.openNote.addHalfSteps(fret_num)
+
+
 class Chord:
-    def __init__(self):
-        pass
+    def __init__(self, root, chord_type):
+        self.name = f"{root}{chord_type}"
+        self.note1 = Note(root)
+        if chord_type == "M":
+            self.note2 = self.note1.addHalfSteps(4)
+            self.note3 = self.note2.addHalfSteps(3)
+        if chord_type == "m":
+            self.note2 = self.note1.addHalfSteps(3)
+            self.note3 = self.note2.addHalfSteps(4)
+        if chord_type == "aug":
+            self.note2 = self.note1.addHalfSteps(4)
+            self.note3 = self.note2.addHalfSteps(4)
+        if chord_type == "dim":
+            self.note2 = self.note1.addHalfSteps(3)
+            self.note3 = self.note2.addHalfSteps(3)
+
+    def contains(self, note):
+        return (self.note1.equalIgnoreOctave(note)) or (self.note2.equalIgnoreOctave(note)) or (self.note3.equalIgnoreOctave(note))
 
 class Guitar:
     def __init__(self, stringNames):
@@ -111,21 +141,29 @@ class PedalSteelGuitar:
         self.pedals["F"] = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
         self.pedals["G"] = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
 
-    def print_fretboard(self):
-        first = True
+    def print_fretboard(self, chord=None):
+        first_line = ""
+        for f in range(self.num_frets):
+            first_line += f"{f:>3} |"
+        div = re.sub(r".", "-", first_line)
+        print(first_line)
+        print(div)
         for s in self.guitar.strings:
             line = ""
             for f in range(self.num_frets):
-                note = s.fret(f)
+                note = s.fret_note(f)
+                in_chord = False
+                if chord is not None:
+                    if chord.contains(note):
+                        in_chord = True
                 result = re.sub(r"\d+", "", note.name)
                 fret = f" {result}"
                 if len(fret)==2:
                     fret+=" "
+                if in_chord:
+                    fret = f"\033[92m{fret}\033[0m"
                 line += f"{fret} |";
-            div = re.sub(r".", "-", line)
-            if first:
-                print(div)
-                first = False
+                    
             print(line)
             print(div)
 
@@ -216,24 +254,59 @@ class SimpleCompleter(object):
         return response
 
 psg = PedalSteelGuitar()
+all_chords = {}
+
+def make_completer(vocabulary):
+    """
+    Creates a custom completer function for readline.
+    """
+    def custom_complete(text, state):
+        results = [x for x in vocabulary if x.startswith(text)] + [None]
+        # Add a space after completion if it's a full word, mimicking default readline behavior.
+        completion = results[state]
+        if completion is not None and completion in vocabulary:
+            return completion + " "
+        return completion
+    return custom_complete
 
 def input_loop():
     line = ''
     while line != 'quit':
-        line = input('Prompt ("quit" to quit): ')
-        if line in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
+        chord = None
+        try:
+            line = input('Prompt ("quit" to quit): ').strip()
+        except EOFError as e:
+            sys.exit()
+        if line in ['pA', 'pB', 'pC', 'pD', 'pE', 'pF', 'pG']:
+            line = line[1:]
             psg.pedalToggle(line)
+            psg.print_pedals()
         if line == 'pedals':
             psg.print_pedals()
-            continue
-        psg.print_fretboard()
+        if line in [c for c in all_chords.keys()]:
+            chord = all_chords[line]
+            
+        psg.print_fretboard(chord)
 
 if __name__ == "__main__":
     psg.print_fretboard()
-    readline.set_completer(SimpleCompleter(['A','B','C','D','E','F','G', 'chord', 'pedals']).complete)
+    vocabulary = ['pA','pB','pC','pD','pE','pF','pG', 'pedals']
 
-    # Use the tab key for completion
-    readline.parse_and_bind('tab: complete')
+    root_notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
+    chord_types = ["M", "m", "dim", "aug"]
+
+    for root in root_notes:
+        for chord_type in chord_types:
+            c = Chord(root, chord_type)
+            all_chords[c.name] = c
+            vocabulary.append(c.name)
+    
+
+    # Bind the Tab key to the complete function
+    readline.parse_and_bind('bind ^I rl_complete')
+
+    # Set the custom completer function
+    readline.set_completer(make_completer(vocabulary))
 
     # Prompt the user for text
     input_loop()
