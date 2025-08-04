@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import readline
 import math
 import re
 
@@ -51,7 +52,7 @@ class Note:
 
     def addHalfSteps(self, num: int):
         return Note(self.num + num)
-        
+
     def __eq__(self, other):
         return self.num == other.num
 
@@ -71,8 +72,11 @@ class GuitarString:
     def __repr__(self):
         return f"{self.openNote}"
 
+    # returns a GuitarString
     def fret(self, fret_num):
-        return self.openNote.addHalfSteps(fret_num)
+        note = self.openNote.addHalfSteps(fret_num).name
+        result = GuitarString(note)
+        return result
 
 class Chord:
     def __init__(self):
@@ -128,6 +132,12 @@ class PedalSteelGuitar:
     def __repr__(self):
         return f"{self.guitar}"
 
+    def pedalToggle(self, index):
+        if index in self.actuated:
+            self.pedalRelease(index)
+        else:
+            self.pedalPush(index)
+
     def pedalPush(self, index):
         if index in self.actuated:
             return
@@ -148,10 +158,82 @@ class PedalSteelGuitar:
             s = s.fret(-offset)
             self.guitar.strings[i] = s
 
+    def print_pedals(self):
+        a = " "
+        b = " "
+        c = " "
+        d = " "
+        e = " "
+        f = " "
+        g = " "
+        if 'A' in self.actuated:
+            a = "X"
+        if 'B' in self.actuated:
+            b = "X"
+        if 'C' in self.actuated:
+            c = "X"
+
+        if 'D' in self.actuated:
+            d = "X"
+        if 'E' in self.actuated:
+            e = "X"
+        if 'F' in self.actuated:
+            f = "X"
+        if 'G' in self.actuated:
+            g = "X"
+
+        print("A B C   D E F G")
+        print(f"{a} {b} {c}   {d} {e} {f} {g}")
+
     def fret(self, num):
         notes = [s.fret(num) for s in self.guitar.strings]
         return notes
 
+
+class SimpleCompleter(object):
+
+    def __init__(self, options):
+        self.options = sorted(options)
+        return
+
+    def complete(self, text, state):
+        response = None
+        if state == 0:
+            # This is the first time for this text, so build a match list.
+            if text:
+                self.matches = [s
+                                for s in self.options
+                                if s and s.startswith(text)]
+            else:
+                self.matches = self.options[:]
+
+        # Return the state'th item from the match list,
+        # if we have that many.
+        try:
+            response = self.matches[state]
+        except IndexError:
+            response = None
+        return response
+
+psg = PedalSteelGuitar()
+
+def input_loop():
+    line = ''
+    while line != 'quit':
+        line = input('Prompt ("quit" to quit): ')
+        if line in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
+            psg.pedalToggle(line)
+        if line == 'pedals':
+            psg.print_pedals()
+            continue
+        psg.print_fretboard()
+
 if __name__ == "__main__":
-    psg = PedalSteelGuitar()
     psg.print_fretboard()
+    readline.set_completer(SimpleCompleter(['A','B','C','D','E','F','G', 'chord', 'pedals']).complete)
+
+    # Use the tab key for completion
+    readline.parse_and_bind('tab: complete')
+
+    # Prompt the user for text
+    input_loop()
