@@ -149,10 +149,13 @@ class PedalSteelGuitar:
         first_line = ""
         for f in range(self.num_frets):
             first_line += f"{f:>3} |"
+
+        # add the pedal info
+        first_line += "  A |  B |  C |  D |  E |  F |  G |"
         div = re.sub(r".", "-", first_line)
         print(first_line)
         print(div)
-        for s in self.guitar.strings:
+        for i,s in enumerate(self.guitar.strings):
             line = ""
             for f in range(self.num_frets):
                 note = s.fret_note(f)
@@ -167,8 +170,51 @@ class PedalSteelGuitar:
                 if in_chord:
                     fret = f"{BLACK_TEXT}{GREEN_BACKGROUND}{fret}{RESET}"
                 line += f"{fret} |";
+            a = " "
+            b = " "
+            c = " "
+            d = " "
+            e = " "
+            f = " "
+            g = " "
+            if self.pedals["A"][i] != 0:
+                if "A" in self.actuated:
+                    a = "X"
+                else:
+                    a = "-"
+            if self.pedals["B"][i] != 0:
+                if "B" in self.actuated:
+                    b = "X"
+                else:
+                    b = "-"
+            if self.pedals["C"][i] != 0:
+                if "C" in self.actuated:
+                    c = "X"
+                else:
+                    c = "-"
+            if self.pedals["D"][i] != 0:
+                if "D" in self.actuated:
+                    d = "X"
+                else:
+                    d = "-"
+            if self.pedals["E"][i] != 0:
+                if "E" in self.actuated:
+                    e = "X"
+                else:
+                    e = "-"
+            if self.pedals["F"][i] != 0:
+                if "F" in self.actuated:
+                    f = "X"
+                else:
+                    f = "-"
+            if self.pedals["G"][i] != 0:
+                if "G" in self.actuated:
+                    g = "X"
+                else:
+                    g = "-"
+            end_line = f"  {a} |  {b} |  {c} |  {d} |  {e} |  {f} |  {g} |"
                     
-            print(line)
+            print(line + end_line)
             print(div)
 
     def __repr__(self):
