@@ -142,6 +142,10 @@ class PedalSteelGuitar:
         self.pedals["G"] = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
 
     def print_fretboard(self, chord=None):
+        BLACK_TEXT = "\033[30m"  # ANSI code for black foreground
+        GREEN_BACKGROUND = "\033[42m" # ANSI code for green background
+        RESET = "\033[0m" # ANSI code to reset formatting
+
         first_line = ""
         for f in range(self.num_frets):
             first_line += f"{f:>3} |"
@@ -161,7 +165,7 @@ class PedalSteelGuitar:
                 if len(fret)==2:
                     fret+=" "
                 if in_chord:
-                    fret = f"\033[92m{fret}\033[0m"
+                    fret = f"{BLACK_TEXT}{GREEN_BACKGROUND}{fret}{RESET}"
                 line += f"{fret} |";
                     
             print(line)
@@ -271,8 +275,8 @@ def make_completer(vocabulary):
 
 def input_loop():
     line = ''
+    chord = None
     while line != 'quit':
-        chord = None
         try:
             line = input('Prompt ("quit" to quit): ').strip()
         except EOFError as e:
@@ -283,6 +287,7 @@ def input_loop():
             psg.print_pedals()
         if line == 'pedals':
             psg.print_pedals()
+            continue
         if line in [c for c in all_chords.keys()]:
             chord = all_chords[line]
             
@@ -301,7 +306,6 @@ if __name__ == "__main__":
             all_chords[c.name] = c
             vocabulary.append(c.name)
     
-
     # Bind the Tab key to the complete function
     readline.parse_and_bind('bind ^I rl_complete')
 
