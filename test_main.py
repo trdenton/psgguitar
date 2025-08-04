@@ -41,3 +41,15 @@ def test_mapNoteToName_G4():
 
 def test_mapNoteToName_FS9():
     assert( main.Note.mapNoteToName(126) == "F#9")
+
+
+def test_String_Fret_A():
+    s = main.GuitarString("A4")
+    note = s.fret(3)
+    assert( note == main.Note("C5") )
+
+def test_Guitar():
+    # run with pytest -s to see what it prints out
+    strings = ["E4", "A4", "D5", "G5", "B5", "E5"]
+    g = main.Guitar(strings)
+    print(f"\n{g}")
