@@ -144,6 +144,7 @@ class PedalSteelGuitar:
     def print_fretboard(self, chord=None):
         BLACK_TEXT = "\033[30m"  # ANSI code for black foreground
         GREEN_BACKGROUND = "\033[42m" # ANSI code for green background
+        YELLOW_BACKGROUND = "\033[43m" # ANSI code for green background
         RESET = "\033[0m" # ANSI code to reset formatting
 
         first_line = ""
@@ -157,6 +158,58 @@ class PedalSteelGuitar:
         print(div)
         for i,s in enumerate(self.guitar.strings):
             line = ""
+            a = " "
+            b = " "
+            c = " "
+            d = " "
+            e = " "
+            f = " "
+            g = " "
+            modified = False
+            if self.pedals["A"][i] != 0:
+                if "A" in self.actuated:
+                    a = "X"
+                    modified = True
+                else:
+                    a = "-"
+            if self.pedals["B"][i] != 0:
+                if "B" in self.actuated:
+                    b = "X"
+                    modified = True
+                else:
+                    b = "-"
+            if self.pedals["C"][i] != 0:
+                if "C" in self.actuated:
+                    c = "X"
+                    modified = True
+                else:
+                    c = "-"
+            if self.pedals["D"][i] != 0:
+                if "D" in self.actuated:
+                    d = "X"
+                    modified = True
+                else:
+                    d = "-"
+            if self.pedals["E"][i] != 0:
+                if "E" in self.actuated:
+                    e = "X"
+                    modified = True
+                else:
+                    e = "-"
+            if self.pedals["F"][i] != 0:
+                if "F" in self.actuated:
+                    f = "X"
+                    modified = True
+                else:
+                    f = "-"
+            if self.pedals["G"][i] != 0:
+                if "G" in self.actuated:
+                    g = "X"
+                    modified = True
+                else:
+                    g = "-"
+            end_line = f"  {a} |  {b} |  {c} |  {d} |  {e} |  {f} |  {g} |"
+
             for f in range(self.num_frets):
                 note = s.fret_note(f)
                 in_chord = False
@@ -168,51 +221,11 @@ class PedalSteelGuitar:
                 if len(fret)==2:
                     fret+=" "
                 if in_chord:
-                    fret = f"{BLACK_TEXT}{GREEN_BACKGROUND}{fret}{RESET}"
+                    if modified:
+                        fret = f"{BLACK_TEXT}{YELLOW_BACKGROUND}{fret}{RESET}"
+                    else:
+                        fret = f"{BLACK_TEXT}{GREEN_BACKGROUND}{fret}{RESET}"
                 line += f"{fret} |";
-            a = " "
-            b = " "
-            c = " "
-            d = " "
-            e = " "
-            f = " "
-            g = " "
-            if self.pedals["A"][i] != 0:
-                if "A" in self.actuated:
-                    a = "X"
-                else:
-                    a = "-"
-            if self.pedals["B"][i] != 0:
-                if "B" in self.actuated:
-                    b = "X"
-                else:
-                    b = "-"
-            if self.pedals["C"][i] != 0:
-                if "C" in self.actuated:
-                    c = "X"
-                else:
-                    c = "-"
-            if self.pedals["D"][i] != 0:
-                if "D" in self.actuated:
-                    d = "X"
-                else:
-                    d = "-"
-            if self.pedals["E"][i] != 0:
-                if "E" in self.actuated:
-                    e = "X"
-                else:
-                    e = "-"
-            if self.pedals["F"][i] != 0:
-                if "F" in self.actuated:
-                    f = "X"
-                else:
-                    f = "-"
-            if self.pedals["G"][i] != 0:
-                if "G" in self.actuated:
-                    g = "X"
-                else:
-                    g = "-"
-            end_line = f"  {a} |  {b} |  {c} |  {d} |  {e} |  {f} |  {g} |"
                     
             print(line + end_line)
             print(div)
