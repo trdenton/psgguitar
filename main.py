@@ -167,6 +167,8 @@ class PedalSteelGuitar:
         first_line += "  A |  B |  C |  D |  E |  F |  G |"
         div = re.sub(r".", "-", first_line)
         print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH {RESET}")
+        if chord is not None:
+            print(f"Chord: {chord.name}")
         print(first_line)
         print(div)
         for i,s in enumerate(self.guitar.strings):
