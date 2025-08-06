@@ -110,7 +110,13 @@ class Chord:
             self.note3 = self.note2.addHalfSteps(3)
 
     def contains(self, note):
-        return (self.note1.equalIgnoreOctave(note)) or (self.note2.equalIgnoreOctave(note)) or (self.note3.equalIgnoreOctave(note))
+        if self.note1.equalIgnoreOctave(note):
+            return 1
+        if self.note2.equalIgnoreOctave(note):
+            return 2
+        if self.note3.equalIgnoreOctave(note):
+            return 3
+        return 0
 
 class Guitar:
     def __init__(self, stringNames):
@@ -142,9 +148,15 @@ class PedalSteelGuitar:
         self.pedals["G"] = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
 
     def print_fretboard(self, chord=None):
+        WHITE_TEXT = "\033[97"  # ANSI code for black foreground
         BLACK_TEXT = "\033[30m"  # ANSI code for black foreground
+        BLACK_BACKGROUND = "\033[40m" # ANSI code for green background
+        RED_BACKGROUND = "\033[41m" # ANSI code for green background
         GREEN_BACKGROUND = "\033[42m" # ANSI code for green background
         YELLOW_BACKGROUND = "\033[43m" # ANSI code for green background
+        BRIGHT_RED_BACKGROUND = "\033[101m" # ANSI code for green background
+        BRIGHT_GREEN_BACKGROUND = "\033[102m" # ANSI code for green background
+        BRIGHT_YELLOW_BACKGROUND = "\033[103m" # ANSI code for green background
         RESET = "\033[0m" # ANSI code to reset formatting
 
         first_line = ""
@@ -154,6 +166,7 @@ class PedalSteelGuitar:
         # add the pedal info
         first_line += "  A |  B |  C |  D |  E |  F |  G |"
         div = re.sub(r".", "-", first_line)
+        print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH {RESET}")
         print(first_line)
         print(div)
         for i,s in enumerate(self.guitar.strings):
@@ -212,21 +225,34 @@ class PedalSteelGuitar:
 
             for f in range(self.num_frets):
                 note = s.fret_note(f)
-                in_chord = False
+                in_chord = 0
                 if chord is not None:
-                    if chord.contains(note):
-                        in_chord = True
+                    in_chord = chord.contains(note)
                 result = re.sub(r"\d+", "", note.name)
                 fret = f" {result}"
                 if len(fret)==2:
                     fret+=" "
-                if in_chord:
-                    if modified:
-                        fret = f"{BLACK_TEXT}{YELLOW_BACKGROUND}{fret}{RESET}"
-                    else:
-                        fret = f"{BLACK_TEXT}{GREEN_BACKGROUND}{fret}{RESET}"
+
+                bg_color = BLACK_BACKGROUND
+
+                if not modified:
+                    if in_chord == 1:
+                        bg_color = GREEN_BACKGROUND
+                    if in_chord == 2:
+                        bg_color = YELLOW_BACKGROUND
+                    if in_chord == 3:
+                        bg_color = RED_BACKGROUND
+                else:
+                    if in_chord == 1:
+                        bg_color = BRIGHT_GREEN_BACKGROUND
+                    if in_chord == 2:
+                        bg_color = BRIGHT_YELLOW_BACKGROUND
+                    if in_chord == 3:
+                        bg_color = BRIGHT_RED_BACKGROUND
+
+                fret = f"{WHITE_TEXT}{bg_color}{fret}{RESET}"
                 line += f"{fret} |";
-                    
+
             print(line + end_line)
             print(div)
 
@@ -349,7 +375,7 @@ def input_loop():
             continue
         if line in [c for c in all_chords.keys()]:
             chord = all_chords[line]
-            
+
         psg.print_fretboard(chord)
 
 if __name__ == "__main__":
@@ -364,7 +390,7 @@ if __name__ == "__main__":
             c = Chord(root, chord_type)
             all_chords[c.name] = c
             vocabulary.append(c.name)
-    
+
     # Bind the Tab key to the complete function
     readline.parse_and_bind('bind ^I rl_complete')
 
