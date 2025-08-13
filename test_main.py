@@ -45,7 +45,7 @@ def test_mapNoteToName_FS9():
 
 def test_String_Fret_A():
     s = main.GuitarString("A4")
-    note = s.fret(3)
+    note = s.fret_note(3)
     assert( note == main.Note("C5") )
 
 def test_Guitar():

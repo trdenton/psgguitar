@@ -311,6 +311,7 @@ class PedalSteelGuitar:
         if 'G' in self.actuated:
             g = "X"
 
+        print("Pedals:")
         print("A B C   D E F G")
         print(f"{a} {b} {c}   {d} {e} {f} {g}")
 
@@ -379,9 +380,11 @@ def input_loop():
             chord = all_chords[line]
 
         psg.print_fretboard(chord)
+        psg.print_pedals()
 
 if __name__ == "__main__":
     psg.print_fretboard()
+    psg.print_pedals()
     vocabulary = ['pA','pB','pC','pD','pE','pF','pG', 'pedals']
 
     root_notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
