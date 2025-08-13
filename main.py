@@ -132,7 +132,7 @@ class Guitar:
 
 class PedalSteelGuitar:
     def __init__(self):
-        self.num_frets = 24
+        self.num_frets = 25
         notes = ["F#4","D#4","G#4","E4","B4","G#3","F#3","E3","D3","B3"]
         self.guitar = Guitar(notes)
         self.pedals = {}
@@ -147,83 +147,95 @@ class PedalSteelGuitar:
         self.pedals["F"] = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
         self.pedals["G"] = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
 
+    def has_pedals(self):
+        return self.pedals != {}
+
     def print_fretboard(self, chord=None):
-        WHITE_TEXT = "\033[97"  # ANSI code for black foreground
-        BLACK_TEXT = "\033[30m"  # ANSI code for black foreground
-        BLACK_BACKGROUND = "\033[40m" # ANSI code for green background
-        RED_BACKGROUND = "\033[41m" # ANSI code for green background
-        GREEN_BACKGROUND = "\033[42m" # ANSI code for green background
-        YELLOW_BACKGROUND = "\033[43m" # ANSI code for green background
-        BRIGHT_RED_BACKGROUND = "\033[101m" # ANSI code for green background
-        BRIGHT_GREEN_BACKGROUND = "\033[102m" # ANSI code for green background
-        BRIGHT_YELLOW_BACKGROUND = "\033[103m" # ANSI code for green background
+        WHITE_TEXT = "\033[97"
+        BLACK_TEXT = "\033[30m"
+        BLACK_BACKGROUND = "\033[40m"
+        WHITE_BACKGROUND = "\033[47m"
+        RED_BACKGROUND = "\033[41m"
+        GREEN_BACKGROUND = "\033[42m"
+        YELLOW_BACKGROUND = "\033[43m"
+        BRIGHT_RED_BACKGROUND = "\033[101m"
+        BRIGHT_GREEN_BACKGROUND = "\033[102m"
+        BRIGHT_YELLOW_BACKGROUND = "\033[103m"
         RESET = "\033[0m" # ANSI code to reset formatting
 
         first_line = ""
+
+        nut = f"{WHITE_BACKGROUND}||{BLACK_BACKGROUND}"
+
         for f in range(self.num_frets):
             first_line += f"{f:>3} |"
 
         # add the pedal info
-        first_line += "  A |  B |  C |  D |  E |  F |  G |"
-        div = re.sub(r".", "-", first_line)
+        if self.has_pedals():
+            first_line += "  A |  B |  C |  D |  E |  F |  G |"
+        first_line = first_line.replace("|", "| ",1)    # match nut width
+        div = "-" * (self.num_frets*5)
+
         print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH {RESET}")
         if chord is not None:
             print(f"Chord: {chord.name}")
         print(first_line)
         print(div)
         for i,s in enumerate(self.guitar.strings):
-            line = ""
-            a = " "
-            b = " "
-            c = " "
-            d = " "
-            e = " "
-            f = " "
-            g = " "
             modified = False
-            if self.pedals["A"][i] != 0:
-                if "A" in self.actuated:
-                    a = "X"
-                    modified = True
-                else:
-                    a = "-"
-            if self.pedals["B"][i] != 0:
-                if "B" in self.actuated:
-                    b = "X"
-                    modified = True
-                else:
-                    b = "-"
-            if self.pedals["C"][i] != 0:
-                if "C" in self.actuated:
-                    c = "X"
-                    modified = True
-                else:
-                    c = "-"
-            if self.pedals["D"][i] != 0:
-                if "D" in self.actuated:
-                    d = "X"
-                    modified = True
-                else:
-                    d = "-"
-            if self.pedals["E"][i] != 0:
-                if "E" in self.actuated:
-                    e = "X"
-                    modified = True
-                else:
-                    e = "-"
-            if self.pedals["F"][i] != 0:
-                if "F" in self.actuated:
-                    f = "X"
-                    modified = True
-                else:
-                    f = "-"
-            if self.pedals["G"][i] != 0:
-                if "G" in self.actuated:
-                    g = "X"
-                    modified = True
-                else:
-                    g = "-"
-            end_line = f"  {a} |  {b} |  {c} |  {d} |  {e} |  {f} |  {g} |"
+            line = ""
+            end_line = ""
+            if self.has_pedals():
+                a = " "
+                b = " "
+                c = " "
+                d = " "
+                e = " "
+                f = " "
+                g = " "
+                if self.pedals["A"][i] != 0:
+                    if "A" in self.actuated:
+                        a = "X"
+                        modified = True
+                    else:
+                        a = "-"
+                if self.pedals["B"][i] != 0:
+                    if "B" in self.actuated:
+                        b = "X"
+                        modified = True
+                    else:
+                        b = "-"
+                if self.pedals["C"][i] != 0:
+                    if "C" in self.actuated:
+                        c = "X"
+                        modified = True
+                    else:
+                        c = "-"
+                if self.pedals["D"][i] != 0:
+                    if "D" in self.actuated:
+                        d = "X"
+                        modified = True
+                    else:
+                        d = "-"
+                if self.pedals["E"][i] != 0:
+                    if "E" in self.actuated:
+                        e = "X"
+                        modified = True
+                    else:
+                        e = "-"
+                if self.pedals["F"][i] != 0:
+                    if "F" in self.actuated:
+                        f = "X"
+                        modified = True
+                    else:
+                        f = "-"
+                if self.pedals["G"][i] != 0:
+                    if "G" in self.actuated:
+                        g = "X"
+                        modified = True
+                    else:
+                        g = "-"
+                end_line = f"  {a} |  {b} |  {c} |  {d} |  {e} |  {f} |  {g} |"
 
             for f in range(self.num_frets):
                 note = s.fret_note(f)
@@ -255,6 +267,7 @@ class PedalSteelGuitar:
                 fret = f"{WHITE_TEXT}{bg_color}{fret}{RESET}"
                 line += f"{fret} |";
 
+            line = line.replace("|", nut, 1)
             print(line + end_line)
             print(div)
 
@@ -319,6 +332,15 @@ class PedalSteelGuitar:
         notes = [s.fret(num) for s in self.guitar.strings]
         return notes
 
+class SixStringGuitar(PedalSteelGuitar):
+    def __init__(self):
+        self.num_frets = 25
+        notes = ["E4", "A3", "D3", "G3", "B2", "E2"]
+        notes.reverse()
+        self.guitar = Guitar(notes)
+        self.pedals = {}
+        self.actuated = {}
+
 
 class SimpleCompleter(object):
 
@@ -346,6 +368,7 @@ class SimpleCompleter(object):
         return response
 
 psg = PedalSteelGuitar()
+ssg = SixStringGuitar()
 all_chords = {}
 
 def make_completer(vocabulary):
@@ -364,6 +387,7 @@ def make_completer(vocabulary):
 def input_loop():
     line = ''
     chord = None
+    print_six_string = False
     while line != 'quit':
         try:
             line = input('Prompt ("quit" to quit): ').strip()
@@ -378,14 +402,18 @@ def input_loop():
             continue
         if line in [c for c in all_chords.keys()]:
             chord = all_chords[line]
+        if line == '6str':
+            print_six_string = not print_six_string
 
         psg.print_fretboard(chord)
         psg.print_pedals()
+        if print_six_string:
+            ssg.print_fretboard(chord)
 
 if __name__ == "__main__":
     psg.print_fretboard()
     psg.print_pedals()
-    vocabulary = ['pA','pB','pC','pD','pE','pF','pG', 'pedals']
+    vocabulary = ['pA','pB','pC','pD','pE','pF','pG', 'pedals', '6str']
 
     root_notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
     chord_types = ["M", "m", "dim", "aug"]

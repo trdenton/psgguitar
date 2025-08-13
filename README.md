@@ -22,6 +22,8 @@ You can actuate pedals with the following commands. It will toggle the state of 
  * `pF`
  * `pG`
 
+`6str` toggles a display of a standard tuning 6 string guitar below the pedal steel fretboard
+
 
 Example of showing a CMaj chord:
 
