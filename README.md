@@ -12,6 +12,10 @@ Specifying a chord will display it on the fretboard.  Replace C with whatever no
  * `Cm` (Minor chord)
  * `Cdim` (Diminished chord)
  * `Caug` (Augmented chord)
+ * `CM7` (Major 7th)
+ * `Cm7` (Minor 7th)
+ * `Cdim7` (Diminished 7th)
+ * `Cdom7` (Dominant 7th)
 
 You can actuate pedals with the following commands. It will toggle the state of the pedal.  A, B, C are the foot pedals. D, E, F G are the knee levers.
  * `pA`
@@ -28,3 +32,7 @@ You can actuate pedals with the following commands. It will toggle the state of 
 Example of showing a CMaj chord:
 
 ![example output](img/example_CM.png)
+
+Example with a Cdom7 chord, including `6str` output for comparison to a standard guitar neck
+
+![example output](img/example_Cdom7.png)
