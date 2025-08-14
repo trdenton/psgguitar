@@ -63,6 +63,8 @@ class Note:
         return Note(self.num + num)
 
     def __eq__(self, other):
+        if other == None:
+            return False
         return self.num == other.num
 
     def __init__(self, name_or_num):
@@ -96,6 +98,7 @@ class Chord:
     def __init__(self, root, chord_type):
         self.name = f"{root}{chord_type}"
         self.note1 = Note(root)
+        self.note4 = None
         if chord_type == "M":
             self.note2 = self.note1.addHalfSteps(4)
             self.note3 = self.note2.addHalfSteps(3)
@@ -108,6 +111,25 @@ class Chord:
         if chord_type == "dim":
             self.note2 = self.note1.addHalfSteps(3)
             self.note3 = self.note2.addHalfSteps(3)
+        if chord_type == "M7":
+            self.note2 = self.note1.addHalfSteps(4)
+            self.note3 = self.note2.addHalfSteps(3)
+            self.note4 = self.note3.addHalfSteps(4)
+        if chord_type == "dom7":
+            self.note2 = self.note1.addHalfSteps(4)
+            self.note3 = self.note2.addHalfSteps(3)
+            self.note4 = self.note3.addHalfSteps(3)
+        if chord_type == "m7":
+            self.note2 = self.note1.addHalfSteps(3)
+            self.note3 = self.note2.addHalfSteps(4)
+            self.note4 = self.note3.addHalfSteps(3)
+        if chord_type == "dim7":
+            self.note2 = self.note1.addHalfSteps(3)
+            self.note3 = self.note2.addHalfSteps(3)
+            self.note4 = self.note3.addHalfSteps(3)
+
+    def is_seventh(self):
+        return self.note4 != None
 
     def contains(self, note):
         if self.note1.equalIgnoreOctave(note):
@@ -116,6 +138,8 @@ class Chord:
             return 2
         if self.note3.equalIgnoreOctave(note):
             return 3
+        if self.note4 != None and self.note4.equalIgnoreOctave(note):
+            return 4
         return 0
 
 class Guitar:
@@ -158,9 +182,11 @@ class PedalSteelGuitar:
         RED_BACKGROUND = "\033[41m"
         GREEN_BACKGROUND = "\033[42m"
         YELLOW_BACKGROUND = "\033[43m"
+        CYAN_BACKGROUND = "\033[46m"
         BRIGHT_RED_BACKGROUND = "\033[101m"
         BRIGHT_GREEN_BACKGROUND = "\033[102m"
         BRIGHT_YELLOW_BACKGROUND = "\033[103m"
+        BRIGHT_CYAN_BACKGROUND = "\033[106m"
         RESET = "\033[0m" # ANSI code to reset formatting
 
         first_line = ""
@@ -176,7 +202,10 @@ class PedalSteelGuitar:
         first_line = first_line.replace("|", "| ",1)    # match nut width
         div = "-" * (self.num_frets*5)
 
-        print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH {RESET}")
+        if chord is not None and chord.is_seventh():
+            print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH {CYAN_BACKGROUND} SEVENTH {RESET}")
+        else:
+            print(f"{WHITE_TEXT}{GREEN_BACKGROUND} ROOT {YELLOW_BACKGROUND} THIRD {RED_BACKGROUND} FIFTH  {RESET}")
         if chord is not None:
             print(f"Chord: {chord.name}")
         print(first_line)
@@ -256,6 +285,8 @@ class PedalSteelGuitar:
                         bg_color = YELLOW_BACKGROUND
                     if in_chord == 3:
                         bg_color = RED_BACKGROUND
+                    if in_chord == 4:
+                        bg_color = CYAN_BACKGROUND
                 else:
                     if in_chord == 1:
                         bg_color = BRIGHT_GREEN_BACKGROUND
@@ -263,6 +294,8 @@ class PedalSteelGuitar:
                         bg_color = BRIGHT_YELLOW_BACKGROUND
                     if in_chord == 3:
                         bg_color = BRIGHT_RED_BACKGROUND
+                    if in_chord == 4:
+                        bg_color = BRIGHT_CYAN_BACKGROUND
 
                 fret = f"{WHITE_TEXT}{bg_color}{fret}{RESET}"
                 line += f"{fret} |";
@@ -416,7 +449,7 @@ if __name__ == "__main__":
     vocabulary = ['pA','pB','pC','pD','pE','pF','pG', 'pedals', '6str']
 
     root_notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
-    chord_types = ["M", "m", "dim", "aug"]
+    chord_types = ["M", "m", "dim", "aug", "M7", "m7", "dom7","dim7"]
 
     for root in root_notes:
         for chord_type in chord_types:
