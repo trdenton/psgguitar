@@ -1,6 +1,6 @@
 # psgguitar
 
-Visualize notes on a pedal steel fretboard
+Visualize notes on an E9 pedal steel fretboard
 
 run with `python main.py`.
 
